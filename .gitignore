@@ -4,3 +4,4 @@ dist/
 launch_day_map.html
 .DS_Store
 __pycache__/
+.env*
