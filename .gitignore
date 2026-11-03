@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.vercel/
+launch_day_map.html
+.DS_Store
+__pycache__/

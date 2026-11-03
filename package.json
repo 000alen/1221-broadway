@@ -1,0 +1,12 @@
+{
+  "name": "1221-broadway",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.15.1",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "leaflet": "1.9.4"
+  }
+}
