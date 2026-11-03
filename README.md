@@ -11,6 +11,8 @@ corepack pnpm build
 
 Open `dist/index.html`. The built page includes Leaflet, fonts, route data and the basemap and works offline.
 
+Run `corepack pnpm test` for browser regression checks covering playback speeds, real courier movement, pause/resume, replay, mobile layout and high-refresh screens. The tests use local Google Chrome on macOS; elsewhere install Chromium with `corepack pnpm exec playwright install chromium` or set `CHROME_PATH`. Set `TEST_URL` to run the same checks against a deployed site.
+
 - `template.html`: layout, styles, fonts and playback logic.
 - `data/routes.json`: precomputed courier events and road geometry.
 - `data/basemap.json`: map features.

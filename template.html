@@ -239,6 +239,8 @@ function applyCam(t){const [c,z]=camFor(t);const key=c.lat.toFixed(5)+c.lng.toFi
 
 /* render */
 const sl=document.getElementById("t");
+// Keep simulation time separate from the range input: browsers quantize it to step=0.25.
+let currentTime=T0;
 function render(t){
   document.getElementById("clock").textContent=m2t(t);
   sl.style.setProperty("--p",((t-T0)/(T1-T0)*100)+"%");
@@ -252,19 +254,34 @@ function render(t){
   const ev=EVENTS.filter(e=>e[0]<=t+.01).at(-1);
   document.getElementById("tt").textContent=ev?m2t(ev[0]):"9:30";document.getElementById("tm").textContent=ev?ev[1]:"Couriers check in. Every route starts with the same five pickups."
 }
-function set(v){sl.value=v;render(+v)}
-sl.addEventListener("input",()=>{render(+sl.value)});
-let playing=false,last=null,speed=6;
+function updatePlayButton(){btn.textContent=playing?"Pause":(currentTime>=T1?"Replay":"Play");btn.setAttribute("aria-label",btn.textContent)}
+function set(v){currentTime=Math.min(T1,Math.max(T0,Number(v)));sl.value=currentTime;render(currentTime);updatePlayButton()}
+sl.addEventListener("input",()=>{set(sl.value);last=null});
+let playing=false,last=null,speed=6,frame=null;
 const btn=document.getElementById("play");
-function setPlay(p){playing=p;btn.textContent=p?"Pause":(+sl.value>=T1?"Replay":"Play");btn.setAttribute("aria-label",btn.textContent);last=null;if(p)requestAnimationFrame(tick)}
-btn.onclick=()=>{if(+sl.value>=T1)set(T0);setPlay(!playing)};
-function tick(ts){if(!playing)return;if(last!==null){let v=+sl.value+(ts-last)/1000*speed;if(v>=T1){v=T1;setPlay(false)}set(v)}last=ts;if(playing)requestAnimationFrame(tick)}
-document.querySelectorAll(".speed button").forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll(".speed button").forEach(x=>x.classList.toggle("on",x===b))});
-document.querySelectorAll(".views button").forEach(b=>b.onclick=()=>{view=b.dataset.v;lastCam="";document.querySelectorAll(".views button").forEach(x=>x.classList.toggle("on",x===b));render(+sl.value)});
-window.addEventListener("resize",()=>{lastCam="";render(+sl.value)});
+function setPlay(p){
+  if(frame!==null){cancelAnimationFrame(frame);frame=null}
+  playing=p;last=null;updatePlayButton();
+  if(p)frame=requestAnimationFrame(tick);
+}
+btn.onclick=()=>{if(currentTime>=T1)set(T0);setPlay(!playing)};
+function tick(ts){
+  frame=null;
+  if(!playing)return;
+  if(last!==null){
+    const next=currentTime+Math.max(0,ts-last)/1000*speed;
+    set(next);
+    if(currentTime>=T1){setPlay(false);return}
+  }
+  last=ts;frame=requestAnimationFrame(tick);
+}
+document.addEventListener("visibilitychange",()=>{last=null});
+document.querySelectorAll(".speed button").forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll(".speed button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))})});
+document.querySelectorAll(".views button").forEach(b=>b.onclick=()=>{view=b.dataset.v;lastCam="";document.querySelectorAll(".views button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))});render(currentTime)});
+window.addEventListener("resize",()=>{lastCam="";map.invalidateSize();render(currentTime)});
 window.__set=set;
 map.setView(OAK.getCenter(),12);
-render(T0);
+set(T0);
 if(!RECORD && /[?&]autoplay/.test(location.search)) setPlay(true);
 </script>
 </body>
