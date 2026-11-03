@@ -65,224 +65,82 @@ main{position:relative;min-width:0}
 .cm.idle{opacity:.5}
 .leaflet-control-attribution{font-size:9.5px;background:rgba(247,246,242,.85)!important}
 @media (max-width:760px){#app{grid-template-columns:1fr;grid-template-rows:auto 1fr}aside{border-right:0;border-bottom:1px solid var(--rule)}.list{display:none}}
+
+#app{height:100dvh;min-height:600px;grid-template-columns:minmax(320px,380px) 1fr}
+aside{padding:22px;gap:13px;overflow:hidden}
+h1{font-size:30px}.sub{font-size:12px}.scroll-panel{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding-right:4px}.list{overflow:visible}.row b{font-size:12px}.row .slack{font-size:10px}.status{font-size:11px}.time-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--ink2);margin-top:5px}.scrub{padding-bottom:0}.speed{display:flex;justify-content:space-between;margin:0}.speed select{font-size:12px;border:0;background:transparent;color:var(--ink)}.speed button{font-size:12px}.live-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.live-stats span{display:block;font-size:10px;color:var(--ink2)}.live-stats strong{display:block;font:500 25px Newsreader,Georgia,serif;margin-top:3px}details{border-top:1px solid var(--rule);padding:12px 0}summary{font-size:12px;cursor:pointer;font-weight:500}.fields{display:flex;flex-direction:column;gap:12px;padding:13px 0}.fields label{display:flex;align-items:center;justify-content:space-between;font-size:11px;gap:8px}.fields input:not([type=checkbox]),.fields select{width:98px;flex-shrink:0;padding:5px;border:1px solid #d8d0c7;background:var(--paper);border-radius:4px;color:var(--ink);font:inherit}.fields .check{justify-content:flex-start}.fields input[type=checkbox]{accent-color:var(--orange)}.fields small,small{font-size:10px;color:#766b5e;line-height:1.5}.analysis-panel{border-top:1px solid var(--rule);padding:15px 0}.analysis-panel p,.evidence-panel p{font-size:11px;line-height:1.5;margin:8px 0}.eyebrow{font-size:9px;letter-spacing:1px;color:var(--orange);margin-bottom:10px}.actions{display:flex;flex-wrap:wrap;gap:6px}.actions button{font-size:11px;border:1px solid #d8c8b8;background:var(--paper);padding:7px 9px;border-radius:4px;cursor:pointer}.actions button:disabled{opacity:.4;cursor:wait}#analysisStatus{color:#78664d;font-size:10px}.evidence-panel{font-size:11px}.evidence-panel ul{padding-left:18px;line-height:1.6}.evidence-panel li{margin:7px 0}.evidence-panel a{color:var(--orange)}.evidence-panel input[type=file]{display:block;max-width:100%;font-size:10px;margin:8px 0}.wide-table{overflow:auto;margin-top:10px}table{border-collapse:collapse;font-size:10px;min-width:280px}th,td{text-align:left;padding:6px;border-bottom:1px solid #e6dfd5;vertical-align:top}#throughput{height:40px;display:flex;align-items:flex-end;gap:2px;margin-top:12px}#throughput span{display:block;flex:1;background:var(--orange)}.foot{font-size:10px;margin:0}.caption{font-size:12px}.caption #tm{min-width:0}.caption .views{gap:10px}.caption .views button{font-size:11px}.legend{font-size:10px;gap:10px}
+@media(max-width:760px){#app{height:100dvh;grid-template-columns:1fr;grid-template-rows:minmax(290px,45dvh) minmax(300px,55dvh);min-height:660px}aside{padding:15px;overflow:auto;display:block}aside>*{margin-bottom:10px}.scroll-panel{overflow:visible}.list{display:flex}.row{padding:8px 0}.clockrow{margin-top:12px}h1{font-size:25px}.sub{font-size:11px}.caption{flex-wrap:wrap;padding:8px;gap:5px}.caption #tm{max-width:calc(100% - 45px)}.caption .views{flex-basis:100%;justify-content:flex-end}.legend{left:6px;bottom:15px;font-size:9px;gap:7px}.foot{margin-top:15px}}
+
 </style>
 </head>
 <body>
 <div id="app">
 <aside>
-  <div>
-    <h1>Launch day at 1221 Broadway</h1>
-    <div class="sub">Four couriers on a typical first-week day, Tuesday Nov 10. 250 orders, 6 buildings.</div>
-  </div>
-  <div class="clockrow">
-    <div id="clock">9:30</div>
-    <button id="play" aria-label="Play">Play</button>
-  </div>
-  <div class="scrub">
-    <input id="t" type="range" min="570" max="725" step="0.25" value="570" aria-label="Time of day">
-    <div class="ticks" id="ticks"></div>
-  </div>
-  <div class="speed" role="group" aria-label="Playback speed"><span>Speed</span><button data-s="3">Slow</button><button data-s="6" class="on">Normal</button><button data-s="12">Fast</button></div>
+ <h1>Launch day at 1221 Broadway</h1>
+ <div class="sub">A capacity and timing model for the East Bay. Explore a day; test the plan across uncertain days.</div>
+ <div class="clockrow"><div id="clock">9:30</div><button id="play" aria-label="Play">Play</button></div>
+ <div class="scrub"><input id="t" type="range" min="570" max="780" step="0.25" value="570" aria-label="Time of day"><div class="time-labels"><span>9:30</span><span>11:00</span><span>Noon</span></div></div>
+ <div class="speed"><label>Speed <select id="speed"><option value="3">Slow</option><option value="6" selected>Normal</option><option value="12">Fast</option></select></label><button id="newDay" type="button">Another day</button></div>
+ <div class="live-stats" aria-live="polite"><div><span>On shelves</span><strong id="delivered">0 / 250</strong></div><div><span>Tower shelves</span><strong id="towerCount">0 / 200</strong></div></div>
+ <small id="towerActivity" aria-live="polite"></small>
+ <div class="scroll-panel">
   <div class="list" id="cards"></div>
-  <div class="foot">Roads from OpenStreetMap. Drive times are Google Maps typical ranges for Nov 10, checked against Waze. Stop times are simulation medians.</div>
+  <details id="settings"><summary>Scenario controls</summary><div class="fields">
+   <label>Active couriers <input id="activeCouriers" type="number" min="1" max="12"></label>
+   <label>Reserve couriers <input id="reserveCouriers" type="number" min="0" max="1"></label>
+   <label>Tower runners <input id="runners" type="number" min="1" max="12"></label>
+   <label>Intake leads <input id="intakeLeads" type="number" min="1" max="3"></label>
+   <label>Tower orders <input id="orders" type="number" min="10" max="1000" step="10"></label>
+   <label>Meals per vehicle <input id="capacity" type="number" min="20" max="300"></label>
+   <label>Loading positions per kitchen <input id="loadingPositions" type="number" min="1" max="4"></label>
+   <label>Pickup-work multiplier <input id="pickupScale" type="number" min="0.1" max="4" step="0.1"></label>
+   <label>Road-time multiplier <input id="trafficScale" type="number" min="0.1" max="3" step="0.1"></label>
+   <label>Shared traffic correlation <input id="trafficCorrelation" type="number" min="0" max="1" step="0.1"></label>
+   <label>Kitchen-delay multiplier <input id="kitchenDelay" type="number" min="0" max="4" step="0.1"></label>
+   <label>Route staging start <input id="start" type="time" min="09:00" max="11:30"></label>
+   <label>Global order cutoff (assumed) <select id="cutoff"><option value="">Unconfirmed</option><option value="555">9:15 — early locked orders</option><option value="630">10:30 — all orders locked</option><option value="640">10:40 — all orders locked</option></select></label>
+   <label>Preparation after cutoff, min <input id="prep" type="number" min="0" max="60"></label>
+   <label>Tower service <select id="towerMode"><option value="floors">Floor delivery</option><option value="lobby">One lobby shelf</option></select></label>
+   <label>Occupied floors <input id="floors" type="number" min="1" max="30"></label>
+   <label>Available elevators <input id="elevators" type="number" min="1" max="6"></label>
+   <label>Meals per cart <input id="cartCapacity" type="number" min="1" max="100"></label>
+   <label class="check"><input id="allowPrestage" type="checkbox"> Allow travel to floors before window opens</label>
+   <label class="check"><input id="runnerAssist" type="checkbox"> Courier 4 becomes a runner after route completion</label>
+   <label>Contingency <select id="callout"><option value="none">No callouts</option><option value="courier">Courier absence</option><option value="ambassador">Runner absence</option><option value="both">Both absences</option></select></label>
+   <label>Affected route number <input id="failedCourier" type="number" min="1" max="8"></label>
+   <label>Courier callout time <input id="calloutTime" type="time"></label>
+   <label>Runner callout time <input id="ambassadorTime" type="time"></label>
+   <label>Backup response, min <input id="backupResponse" type="number" min="0" max="60"></label>
+   <label>Load-transfer duration, min <input id="transfer" type="number" min="0" max="20"></label>
+   <label class="check"><input id="localBackup" type="checkbox"> Separate local runner replacement</label>
+   <div class="actions"><button id="reset" type="button">Reset plan</button></div>
+  </div></details>
+  <section class="analysis-panel">
+   <div class="eyebrow">CONDITIONAL SCENARIO ESTIMATES</div><p id="evidenceBadge">Generated priors · no observed samples</p>
+   <div class="live-stats"><div><span>All orders on time</span><strong id="probability">…</strong></div><div><span>Late/unserved per day</span><strong id="lateAverage">…</strong></div></div>
+   <p id="probabilityDetail"></p>
+   <div class="live-stats"><div><span>Completion P50</span><strong id="p50">…</strong></div><div><span>Completion P95</span><strong id="p95">…</strong></div></div>
+   <p>Pickup stop P50 / P95: <b id="pickupEstimate">…</b></p><small id="interval"></small>
+   <div id="throughput" aria-label="Representative-day deliveries per five minutes"></div><small>Representative-day deliveries per five minutes</small>
+   <div class="fields"><label>Simulated days <select id="runs"><option value="100">100</option><option value="500" selected>500</option><option value="1000">1,000</option></select></label><label>Random seed <input id="seed" type="number" min="1"></label></div>
+   <div class="actions"><button id="run" type="button">Run estimates</button><button id="compare" type="button">Compare changes</button><button id="export" type="button">Export report</button></div>
+   <p id="analysisStatus" aria-live="polite">Preparing model…</p>
+   <details id="comparison"><summary>Sensitivity comparison</summary><div class="wide-table"><table><thead><tr><th>Scenario</th><th>On time</th><th>P95</th><th>Late/day</th></tr></thead><tbody id="sensitivity"></tbody></table></div></details>
+  </section>
+  <details class="evidence-panel"><summary>Evidence, observations & assumptions</summary>
+   <p id="evidenceStatus"></p><ul id="warnings"></ul>
+   <p>Numeric service priors below are generated planning assumptions, not restaurant measurements. Road bounds come from the supplied reference. The model samples them; it does not validate them.</p>
+   <label>Import timing CSV <input type="file" id="observations" accept=".csv,text/csv"></label>
+   <p id="importStatus" aria-live="polite">No observed samples loaded.</p>
+   <div class="actions"><button id="templateCsv" type="button">CSV template</button><button id="clearData" type="button">Clear observations</button></div>
+   <small>Columns: kind,key,minutes,orders,evidence,source,observed_at. Only rows explicitly labeled evidence=observed are used as observations. Loading duration excludes readiness and queue time. Full schema is in docs/model.md.</small>
+   <div class="wide-table"><table><thead><tr><th>Input</th><th>Low / mode / high</th><th>Unit</th><th>Basis</th></tr></thead><tbody id="priors"></tbody></table></div>
+   <ul id="sources"></ul>
+  </details>
+ </div>
+ <div class="foot">Model outputs are conditional on the inputs. No field-calibrated reliability or staffing guarantee is claimed.</div>
 </aside>
-<main>
-  <div id="map" role="application" aria-label="Map of courier routes"></div>
-  <div class="caption"><span class="tt" id="tt"></span><span id="tm"></span><span class="views" role="group" aria-label="Map view"><button data-v="auto" class="on">Follow</button><button data-v="oak">Oakland</button><button data-v="bay">East Bay</button></span></div>
-  <div class="legend">
-    <span><i class="lg-l"></i>Pickup loop</span>
-    <span><i class="lg-p"></i>Restaurant</span>
-    <span><i class="lg-d"></i>Building</span>
-    <span><i class="lg-b"></i>Backup courier</span>
-  </div>
-</main>
+<main><div id="map" role="application" aria-label="Map of courier routes"></div><div class="caption"><span class="tt" id="tt">9:30</span><span id="tm"></span><span class="views" role="group" aria-label="Map view"><button data-view="auto" class="on">Follow</button><button data-view="oak">Oakland</button><button data-view="bay">East Bay</button></span></div><div class="legend"><span><i class="lg-l"></i>Routes</span><span><i class="lg-p"></i>Restaurant</span><span><i class="lg-d"></i>Building</span><span><i class="lg-b"></i>Backup</span></div></main>
 </div>
-<script>/*LEAFLET_JS*/</script>
-<script>
-const B=/*BASEMAP*/, R=/*ROUTES*/;
-const m2t=x=>{x=Math.round(x);let h=Math.floor(x/60),m=x%60;return h+":"+String(m).padStart(2,"0")};
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const css=getComputedStyle(document.documentElement), V=n=>css.getPropertyValue(n).trim();
-const COL={C1:V("--c1"),C2:V("--c2"),C3:V("--c3"),C4:V("--c4")};
-const SHORT={C1:"Concord",C2:"San Leandro and Alameda",C3:"Downtown, first car",C4:"Downtown, second car"};
-const NAMES={Saucy:"Saucy Asian",Adeline:"Adeline",Wise:"Wise Sons",Kitava:"Kitava",SqPie:"Square Pie Guys",T1221:"1221 Broadway",CK:"Credit Karma",Alameda:"Science Alameda",SL:"WF San Leandro",Concord:"Concord Tech Center",WFConcord:"WF Concord"};
-const DL={T1221:685,CK:710,SL:710,Alameda:740,Concord:710};   // shelf deadlines (min); 1221 = 11:25 handoff to ambassadors
-const LOOP=["Saucy>Adeline","Adeline>Wise","Wise>Kitava"];
-const T0=570,T1=725;
-const RECORD=/[?&]record/.test(location.search);
-
-/* ---------- map ---------- */
-const map=L.map("map",{zoomSnap:0,zoomDelta:.5,zoomControl:false,attributionControl:true,preferCanvas:true,fadeAnimation:false,zoomAnimation:!RECORD,markerZoomAnimation:!RECORD});
-map.attributionControl.setPrefix(false);
-map.attributionControl.addAttribution('© OpenStreetMap contributors, OpenFreeMap, OSRM');
-["base","roads","routes","trail","labels","couriers"].forEach((p,i)=>map.createPane(p).style.zIndex=200+i*50);
-const rendB=L.canvas({padding:.5,pane:"base"}),rendR=L.canvas({padding:.5,pane:"roads"});
-const poly=f=>/Polygon/.test(f.geometry.type);
-L.geoJSON({type:"FeatureCollection",features:B.features.filter(f=>f.properties.k==="park"&&poly(f))},{pane:"base",renderer:rendB,interactive:false,style:{stroke:false,fillColor:V("--park"),fillOpacity:1}}).addTo(map);
-L.geoJSON({type:"FeatureCollection",features:B.features.filter(f=>f.properties.k==="water"&&poly(f))},{pane:"base",renderer:rendB,interactive:false,style:{stroke:false,fillColor:V("--water"),fillOpacity:1}}).addTo(map);
-const RS={motorway:[3.6,"--fwy",5.4,"--fwyedge"],trunk:[3,"--fwy",4.4,"--fwyedge"],primary:[2.4,"--road",3.6,"--roadedge"],secondary:[1.8,"--road",2.8,"--roadedge"],tertiary:[1.3,"--road",2.2,"--roadedge"],minor:[.9,"--road",1.6,"--roadedge"]};
-const roadLayers=[];
-for(const pass of [0,1]) for(const c of ["minor","tertiary","secondary","primary","trunk","motorway"]){
-  const fs=B.features.filter(f=>f.properties.k==="road"&&f.properties.c===c); if(!fs.length) continue;
-  const s=RS[c], mz=Math.min(...fs.map(f=>f.properties.minz));
-  const l=L.geoJSON({type:"FeatureCollection",features:fs},{pane:"roads",renderer:rendR,interactive:false,style:pass?{color:V(s[1]),weight:s[0],lineCap:"round",lineJoin:"round"}:{color:V(s[3]),weight:s[2],lineCap:"round",lineJoin:"round"}});
-  roadLayers.push([c==="minor"?13.5:c==="tertiary"?12.4:c==="secondary"?11.8:0,l]);
-}
-const labelLayers=[];
-B.features.filter(f=>f.properties.k==="place"||f.properties.k==="ref").forEach(f=>{
-  const p=f.properties; let c=f.geometry.coordinates,t=f.geometry.type;
-  if(t==="LineString") c=c[Math.floor(c.length/2)]; else if(t==="MultiLineString") c=c[0][Math.floor(c[0].length/2)]; else if(t!=="Point") return;
-  if(p.k==="ref"&&!/^(I|CA|US)?-?\s?\d+/.test(p.n)) return;
-  if(p.k==="place"&&/^Concord$/i.test(p.n)) return;
-  const html=p.k==="ref"?`<span class="shield">${esc(p.n.replace(/;.*/,""))}</span>`:`<span class="place">${esc(p.n)}</span>`;
-  const mk=L.marker([c[1],c[0]],{pane:"labels",interactive:false,icon:L.divIcon({className:"",html,iconSize:null,iconAnchor:[0,0]})});
-  labelLayers.push([p.k==="ref"?12.2:Math.max(p.minz||0,(p.c==="city"?0:12.6)),mk]);
-});
-function refreshBase(){const z=map.getZoom();(typeof pickLabels!=="undefined")&&pickLabels.forEach(m=>m.setOpacity(z>=12.3?1:0));(typeof dtMk!=="undefined")&&dtMk.setOpacity(z>=12.3?0:1);for(const [mz,l] of roadLayers.concat(labelLayers)){const on=z>=mz;if(on&&!map.hasLayer(l))map.addLayer(l);else if(!on&&map.hasLayer(l))map.removeLayer(l);}}
-map.on("zoomend",refreshBase);
-
-/* ---------- routes ---------- */
-const legOf=(c,k)=>{const id=(c.legs&&c.legs[k])||"a";return (R.legs[k]||[]).find(x=>x.id===id)};
-const dist=(a,b)=>{const k=Math.cos(a[0]*Math.PI/180);return Math.hypot(a[0]-b[0],(a[1]-b[1])*k)};
-function cum(g){const d=[0];for(let i=1;i<g.length;i++)d.push(d[i-1]+dist(g[i-1],g[i]));return d}
-function cut(g,d,f){const tgt=f*d[d.length-1];const out=[g[0]];for(let i=1;i<g.length;i++){if(d[i]>=tgt){const r=(tgt-d[i-1])/((d[i]-d[i-1])||1);out.push([g[i-1][0]+(g[i][0]-g[i-1][0])*r,g[i-1][1]+(g[i][1]-g[i-1][1])*r]);return out}out.push(g[i])}return out}
-// shared loop, drawn once
-LOOP.forEach(k=>{const g=R.legs[k][0].geo;L.polyline(g,{pane:"routes",color:"#fff",weight:8,interactive:false}).addTo(map);L.polyline(g,{pane:"routes",color:"#3B3833",weight:4,interactive:false}).addTo(map)});
-// each courier's own legs: faint full path, plus a solid trail that grows
-const OFF={C1:-1.5,C2:-.5,C3:.5,C4:1.5};
-const used={};R.couriers.forEach(c=>c.seq.forEach(k=>{if(LOOP.includes(k))return;const id=(c.legs&&c.legs[k])||"a";used[k+id]=(used[k+id]||0)+1}));
-const C=R.couriers.map(c=>{
-  const legs={};
-  c.seq.forEach(k=>{if(LOOP.includes(k))return;const a=legOf(c,k);const id=(c.legs&&c.legs[k])||"a";
-    let g=a.geo; if(used[k+id]>1) g=g.map(p=>[p[0]+OFF[c.id]*0.00005,p[1]+OFF[c.id]*0.00005]);
-    legs[k]={g,d:cum(g)};
-    L.polyline(g,{pane:"routes",color:"#fff",weight:7,opacity:.8,interactive:false}).addTo(map);
-    L.polyline(g,{pane:"routes",color:COL[c.id],weight:4,opacity:.28,interactive:false}).addTo(map);});
-  if(c.extra) c.extra.forEach(k=>{const g=R.legs[k][0].geo;L.polyline(g,{pane:"routes",color:COL[c.id],weight:4,opacity:.28,interactive:false}).addTo(map)});
-  const trail=L.polyline([],{pane:"trail",color:COL[c.id],weight:5,opacity:1,interactive:false,lineCap:"round"}).addTo(map);
-  const mk=L.marker([0,0],{pane:"couriers",interactive:false,icon:L.divIcon({className:"",html:`<div class="cm" style="background:${COL[c.id]}">${c.id.slice(1)}</div>`,iconSize:[24,24],iconAnchor:[12+OFF[c.id]*5,12+OFF[c.id]*2]})}).addTo(map);
-  return {c,legs,trail,mk};
-});
-// stops
-const pickLabels=[];
-const LBL={Saucy:["left",0,-2],Adeline:["right",0,-2],Wise:["left",0,-10],Kitava:["right",0,0],SqPie:["left",0,-8],T1221:["right",0,-12],CK:["right",4,10],Alameda:["right",0,0],SL:["right",0,0],Concord:["right",16,0]};
-for(const [k,s] of Object.entries(R.stops)){
-  if(k==="WFConcord") continue;
-  const pick=s[1]==="pickup";
-  const icon=pick?`<div style="width:13px;height:13px;border-radius:50%;background:#fff;border:2.5px solid #12110C"></div>`:`<div style="width:13px;height:13px;background:#12110C;border:2px solid #fff;box-shadow:0 0 0 1px #12110C"></div>`;
-  L.marker([s[2],s[3]],{pane:"labels",interactive:false,icon:L.divIcon({className:"",html:icon,iconSize:[13,13],iconAnchor:[6.5,6.5]})}).addTo(map);
-  const o=LBL[k]||["right",0,0]; const sub=k==="T1221"?"200 orders, 24 floors":k==="Concord"?"Two buildings":"";
-  const name=k==="Concord"?"Concord":NAMES[k];
-  const html=`<div class="stoplbl ${pick?"":"drop"}" style="position:absolute;${o[0]==="left"?"right:12px":"left:12px"};top:${-11+o[2]}px">${esc(name)}${sub?`<small>${sub}</small>`:""}</div>`;
-  const lm=L.marker([s[2],s[3]],{pane:"labels",interactive:false,icon:L.divIcon({className:"",html,iconSize:[0,0],iconAnchor:[-o[1],0]})}).addTo(map);
-  if(pick||k==="CK"||k==="T1221") pickLabels.push(lm);
-}
-const benchMk=L.marker([R.bench.lat,R.bench.lng],{pane:"labels",interactive:false,icon:L.divIcon({className:"",html:`<div style="width:14px;height:14px;border-radius:50%;background:#fff;border:2px dashed #525252"></div><div class="stoplbl" style="position:absolute;left:-36px;top:15px;color:#525252">Backup courier</div>`,iconSize:[14,14],iconAnchor:[7,7]})}).addTo(map);
-pickLabels.push(benchMk);
-const dtMk=L.marker([R.stops.T1221[2],R.stops.T1221[3]],{pane:"labels",interactive:false,icon:L.divIcon({className:"",html:`<div class="stoplbl drop" style="position:absolute;left:14px;top:-14px">Downtown<small>1221 Broadway and Credit Karma</small></div>`,iconSize:[0,0]})}).addTo(map);
-
-/* ---------- state ---------- */
-function along(L_,f){return cut(L_.g,L_.d,f).at(-1)}
-function stateOf(o,t){const c=o.c,ev=c.events,st=k=>[R.stops[k][2],R.stops[k][3]];
-  const nPick=ev.filter(e=>e.kind==="pick").length;
-  if(t<ev[0].arr) return {p:st(ev[0].place),s:`Starts ${m2t(ev[0].arr)} at ${NAMES[ev[0].place]}`,idle:true,prog:0,leg:-1};
-  for(let i=0;i<ev.length;i++){const e=ev[i];
-    if(t<=e.dep){const done=ev.slice(0,i).length;
-      const s=e.kind==="pick"?`Picking up at ${NAMES[e.place]} (${ev.slice(0,i+1).filter(x=>x.kind==="pick").length} of ${nPick})`:(e.place==="T1221"?`Handing bags to ambassadors at 1221`:`Stocking the shelf at ${NAMES[e.place]}`);
-      return {p:st(e.place),s,prog:(i+.5)/ev.length,leg:i,frac:1};}
-    const n=ev[i+1]; if(n&&t<n.arr){const k=e.place+">"+n.place,f=(t-e.dep)/(n.arr-e.dep);
-      const p=o.legs[k]?along(o.legs[k],f):interp(st(e.place),st(n.place),f,k);
-      return {p,s:`Driving to ${NAMES[n.place]}, arrives ${m2t(n.arr)}`,prog:(i+1)/ev.length,leg:i,frac:f,k};}}
-  const l=ev.at(-1);return {p:st(l.place),s:c.id==="C4"?"Running tower floors with the ambassadors":`Route done at ${m2t(l.dep)}`,prog:1,leg:ev.length,done:true}}
-function interp(a,b,f,k){const g=R.legs[k]&&R.legs[k][0].geo;if(g){const d=cum(g);return cut(g,d,f).at(-1)}return [a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f]}
-function trailOf(o,t){const c=o.c,ev=c.events,out=[];
-  for(let i=0;i<ev.length-1;i++){const k=ev[i].place+">"+ev[i+1].place,Lg=o.legs[k];if(!Lg)continue;
-    if(t>=ev[i+1].arr) out.push(Lg.g); else if(t>ev[i].dep){out.push(cut(Lg.g,Lg.d,(t-ev[i].dep)/(ev[i+1].arr-ev[i].dep)));break} else break;}
-  return out}
-
-/* events for the toast */
-const EVENTS=[];
-R.couriers.forEach(c=>c.events.forEach((e,i)=>{
-  if(i===0) EVENTS.push([e.arr,`Courier ${c.id.slice(1)} picks up first at Saucy Asian`]);
-  if(e.kind==="pick"&&e.place==="SqPie") EVENTS.push([e.dep,`Courier ${c.id.slice(1)} has all five pickups and leaves for ${c.id==="C1"?"Concord":c.id==="C2"?"San Leandro":"1221 Broadway"}`]);
-  if(e.kind==="drop"){const sl=Math.round(DL[e.place]-e.dep);EVENTS.push([e.dep,e.place==="T1221"?`Courier ${c.id.slice(1)} hands half the tower orders to the ambassadors, ${sl} min early`:`Courier ${c.id.slice(1)} stocks the shelf at ${NAMES[e.place]}, ${sl} min early`])}
-}));
-EVENTS.push([645,"All four couriers are mid-route. If one drops out now, the backup courier takes over"]);
-EVENTS.push([700,"The 1221 window opens. Ambassadors are stocking the floors"]);
-EVENTS.push([720,"All six buildings delivered"]);
-EVENTS.sort((a,b)=>a[0]-b[0]);
-
-
-/* cards */
-const cards=document.getElementById("cards");
-cards.innerHTML=C.map(({c})=>`<div class="row"><div class="top"><span class="num" style="color:${COL[c.id]}">${c.id.slice(1)}</span><b>${SHORT[c.id]}</b><span class="slack" id="ch-${c.id}"></span></div><div class="status" id="st-${c.id}"></div><div class="bar"><i id="br-${c.id}" style="background:${COL[c.id]}"></i></div></div>`).join("");
-const DONE={};C.forEach(({c})=>{const drops=c.events.filter(e=>e.kind==="drop");DONE[c.id]=drops.map(e=>[e.dep,Math.round(DL[e.place]-e.dep)])});
-
-/* ticks */
-const TK=[[573,"9:33",0],[600,"10:00",0],[645,"10:45",1],[667,"11:07",0],[700,"11:40",1],[720,"12:00",0]];
-document.getElementById("ticks").innerHTML=TK.map(([v,l,k])=>`<span class="tick ${k?"key":""}" data-v="${v}" style="left:${(v-T0)/(T1-T0)*100}%">${l}</span>`).join("");
-document.querySelectorAll(".tick").forEach(e=>e.onclick=()=>{set(+e.dataset.v)});
-
-/* camera */
-const OAK=L.latLngBounds([[37.795,-122.300],[37.845,-122.252]]);
-const BAY=L.latLngBounds([[37.712,-122.32],[37.99,-122.0]]);
-let view="auto";
-function camFor(t){
-  const a=map.getBoundsZoom(OAK,false,[40,70]),b=map.getBoundsZoom(BAY,false,[40,80]);
-  const ca=OAK.getCenter(),cb=BAY.getCenter();
-  if(view==="oak") return [ca,a]; if(view==="bay") return [cb,b];
-  const u=Math.min(1,Math.max(0,(t-647)/9)),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
-  return [L.latLng(ca.lat+(cb.lat-ca.lat)*e,ca.lng+(cb.lng-ca.lng)*e),a+(b-a)*e];
-}
-let lastCam="";
-function applyCam(t){const [c,z]=camFor(t);const key=c.lat.toFixed(5)+c.lng.toFixed(5)+z.toFixed(3);if(key===lastCam)return;lastCam=key;map.setView(c,z,{animate:false});refreshBase()}
-
-/* render */
-const sl=document.getElementById("t");
-// Keep simulation time separate from the range input: browsers quantize it to step=0.25.
-let currentTime=T0;
-function render(t){
-  document.getElementById("clock").textContent=m2t(t);
-  sl.style.setProperty("--p",((t-T0)/(T1-T0)*100)+"%");
-  applyCam(t);
-  C.forEach(o=>{const s=stateOf(o,t);o.mk.setLatLng(s.p);o.mk.getElement()&&o.mk.getElement().firstChild.classList.toggle("idle",!!s.idle);
-    o.trail.setLatLngs(trailOf(o,t));
-    document.getElementById("st-"+o.c.id).textContent=s.s;
-    document.getElementById("br-"+o.c.id).style.width=(s.prog*100)+"%";
-    const ch=document.getElementById("ch-"+o.c.id);const done=DONE[o.c.id].filter(d=>t>=d[0]);
-    ch.textContent=done.length?`${done.map(d=>d[1]).join(" and ")} min early`:`starts ${o.c.start}`;});
-  const ev=EVENTS.filter(e=>e[0]<=t+.01).at(-1);
-  document.getElementById("tt").textContent=ev?m2t(ev[0]):"9:30";document.getElementById("tm").textContent=ev?ev[1]:"Couriers check in. Every route starts with the same five pickups."
-}
-function updatePlayButton(){btn.textContent=playing?"Pause":(currentTime>=T1?"Replay":"Play");btn.setAttribute("aria-label",btn.textContent)}
-function set(v){currentTime=Math.min(T1,Math.max(T0,Number(v)));sl.value=currentTime;render(currentTime);updatePlayButton()}
-sl.addEventListener("input",()=>{set(sl.value);last=null});
-let playing=false,last=null,speed=6,frame=null;
-const btn=document.getElementById("play");
-function setPlay(p){
-  if(frame!==null){cancelAnimationFrame(frame);frame=null}
-  playing=p;last=null;updatePlayButton();
-  if(p)frame=requestAnimationFrame(tick);
-}
-btn.onclick=()=>{if(currentTime>=T1)set(T0);setPlay(!playing)};
-function tick(ts){
-  frame=null;
-  if(!playing)return;
-  if(last!==null){
-    const next=currentTime+Math.max(0,ts-last)/1000*speed;
-    set(next);
-    if(currentTime>=T1){setPlay(false);return}
-  }
-  last=ts;frame=requestAnimationFrame(tick);
-}
-document.addEventListener("visibilitychange",()=>{last=null});
-document.querySelectorAll(".speed button").forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll(".speed button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))})});
-document.querySelectorAll(".views button").forEach(b=>b.onclick=()=>{view=b.dataset.v;lastCam="";document.querySelectorAll(".views button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))});render(currentTime)});
-window.addEventListener("resize",()=>{lastCam="";map.invalidateSize();render(currentTime)});
-window.__set=set;
-map.setView(OAK.getCenter(),12);
-set(T0);
-if(!RECORD && /[?&]autoplay/.test(location.search)) setPlay(true);
-</script>
-</body>
-</html>
+<script>/*LEAFLET_JS*/</script><script>/*APP_JS*/</script>
+</body></html>

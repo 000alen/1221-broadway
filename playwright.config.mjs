@@ -3,6 +3,7 @@ import {existsSync} from 'node:fs';
 const chrome='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 export default defineConfig({
   testDir:'./tests',
+  testMatch:'**/*.spec.mjs',
   fullyParallel:true,
   workers:2,
   reporter:'list',

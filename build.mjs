@@ -1,40 +1,10 @@
-import { readFile, mkdir, writeFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-
-const root = new URL('./', import.meta.url);
-const read = (path) => readFile(new URL(path, root), 'utf8');
-const [template, css, js, basemap, routes] = await Promise.all([
-  read('template.html'),
-  read('node_modules/leaflet/dist/leaflet.css'),
-  read('node_modules/leaflet/dist/leaflet.js'),
-  read('data/basemap.json').then(JSON.parse),
-  read('data/routes.json').then(JSON.parse),
-]);
-
-// Preserve the filtering and coordinate precision of the original build.py.
-basemap.features = basemap.features.filter((f) =>
-  ['water', 'park', 'road', 'place', 'ref'].includes(f.properties.k),
-);
-const round = (value) => {
-  if (typeof value === 'number') return Math.round(value * 100000) / 100000;
-  if (Array.isArray(value)) return value.map(round);
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, round(item)]));
-  }
-  return value;
-};
-const replacements = {
-  '/*LEAFLET_CSS*/': css,
-  '/*LEAFLET_JS*/': js.replaceAll('</script', '<\\/script'),
-  '/*BASEMAP*/': JSON.stringify(round(basemap)),
-  '/*ROUTES*/': JSON.stringify(routes),
-};
-let html = template;
-for (const [marker, content] of Object.entries(replacements)) {
-  if (!html.includes(marker)) throw new Error(`Missing template marker: ${marker}`);
-  html = html.replace(marker, () => content);
-}
-const output = new URL('dist/', root);
-await mkdir(output, { recursive: true });
-await writeFile(new URL('index.html', output), html);
-console.log(`Built ${fileURLToPath(new URL('index.html', output))} (${Buffer.byteLength(html)} bytes)`);
+import {createHash} from 'node:crypto';
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {build} from 'esbuild';
+const root=new URL('./',import.meta.url),read=path=>readFile(new URL(path,root),'utf8');
+const [template,css,js,worker]=await Promise.all([read('template.html'),read('node_modules/leaflet/dist/leaflet.css'),read('node_modules/leaflet/dist/leaflet.js'),build({entryPoints:[new URL('src/worker.mjs',root).pathname],bundle:true,write:false,format:'iife',target:'es2022'})]);
+const modelHash=createHash('sha256').update(await read('src/engine.mjs')).update(await read('src/priors.mjs')).digest('hex');
+const app=await build({entryPoints:[new URL('src/app.mjs',root).pathname],bundle:true,write:false,format:'iife',target:'es2022',define:{__WORKER_SOURCE__:JSON.stringify(worker.outputFiles[0].text),__MODEL_HASH__:JSON.stringify(modelHash)}});
+let html=template;
+for(const [marker,value] of Object.entries({'/*LEAFLET_CSS*/':css,'/*LEAFLET_JS*/':js,'/*APP_JS*/':app.outputFiles[0].text})){if(!html.includes(marker))throw Error('Missing '+marker);html=html.replace(marker,()=>value.replaceAll('</script','<\\/script'));}
+await mkdir(new URL('dist/',root),{recursive:true});await writeFile(new URL('dist/index.html',root),html);console.log(`Built dist/index.html (${Buffer.byteLength(html)} bytes)`);
