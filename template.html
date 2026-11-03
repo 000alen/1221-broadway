@@ -79,7 +79,7 @@ h1{font-size:30px}.sub{font-size:12px}.scroll-panel{flex:1;min-height:0;overflow
  <h1>Launch day at 1221 Broadway</h1>
  <div class="sub">A capacity and timing model for the East Bay. Explore a day; test the plan across uncertain days.</div>
  <div class="clockrow"><div id="clock">9:30</div><button id="play" aria-label="Play">Play</button></div>
- <div class="scrub"><input id="t" type="range" min="570" max="780" step="0.25" value="570" aria-label="Time of day"><div class="time-labels"><span>9:30</span><span>11:00</span><span>Noon</span></div></div>
+ <div class="scrub"><input id="t" type="range" min="570" max="780" step="0.25" value="570" aria-label="Time of day"><div class="time-labels"><span>9:30</span><span id="midTime">11:15</span><span id="endTime">1:00</span></div></div>
  <div class="speed"><label>Speed <select id="speed"><option value="3">Slow</option><option value="6" selected>Normal</option><option value="12">Fast</option></select></label><button id="newDay" type="button">Another day</button></div>
  <div class="live-stats" aria-live="polite"><div><span>On shelves</span><strong id="delivered">0 / 250</strong></div><div><span>Tower shelves</span><strong id="towerCount">0 / 200</strong></div></div>
  <small id="towerActivity" aria-live="polite"></small>

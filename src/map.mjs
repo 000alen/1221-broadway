@@ -70,4 +70,4 @@ function draw(t,view='auto'){lastTime=t;lastView=view;if(!result)return[];let u=
 map.setView(OAK.getCenter(),12);window.addEventListener('resize',()=>{lastCam='';map.invalidateSize();draw(lastTime,lastView);});
 return{setResult,draw,map};
 }
-export function time(t){if(!Number.isFinite(t))return 'Unserved';const n=Math.ceil(t-1e-7);return `${Math.floor(n/60)%12||12}:${String(n%60).padStart(2,'0')}`;}
+export function time(t){if(!Number.isFinite(t))return 'Unserved';const n=Math.ceil(t-1e-7);return `${n>=1440?'Day '+(Math.floor(n/1440)+1)+' ':''}${Math.floor(n/60)%12||12}:${String(n%60).padStart(2,'0')}`;}
