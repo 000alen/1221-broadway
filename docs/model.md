@@ -41,3 +41,9 @@ Engine tests cover conservation, resource exclusivity, windows, paired seeds, mo
 `src/priors.mjs` records every synthetic service range and its physical interpretation. A pickup consists of batch setup plus seconds per meal, plus independently modeled kitchen readiness and loading-resource queue. Elevator motion is vertical distance divided by speed, plus boarding/doors and resource waiting. Published Otis equipment speeds only bound a plausible scenario; they do not identify this building. Numerical handling priors are generated assumptions, not observations. Public delivery-platform guidance supports the decomposition but does not calibrate these kitchens.
 
 Return routing is in `data/return-routes.json`, fetched from OSRM with full source URLs and retrieval dates. Routing times are static estimates; the added traffic bounds are explicit assumptions.
+
+## Permanent scenario references
+
+The model, UI, worker, route inputs, prior registry and build definition are fingerprinted together. Each released version is stored as a compressed, self-contained HTML and methodology archive in `snapshots/`, served publicly under its fingerprint. A scenario's fragment identifies this version and restores the non-default plan settings, seed, run count and playback state. This preserves calculations and the presentation of their limitations when the main app changes. Published archives must be retained.
+
+The parser accepts only supported setting names, enumerations and bounded numeric values. It rejects duplicate keys, unknown formats, mismatched model identifiers, oversized fragments and invalid playback states. Observation data and unexposed overrides cannot be silently omitted from a share link. The archive is a reproducibility mechanism, not additional calibration evidence.

@@ -21,7 +21,16 @@ Open `dist/index.html`; the app embeds its fonts, map data, logic, and worker an
 - Reserve response and handoff delay the affected route. Without a reserve, the affected load is unserved. Runner replacement is a separate resource.
 - A Web Worker runs 500 seeded scenarios without blocking playback. Outputs include conditional all-orders-on-time rate, P50/P95 completion, late/unserved orders and pickup distributions. Sensitivity runs use the same seeds.
 - A persistent bottom chart shows shelf deliveries in five-minute intervals. Click or use the keyboard to inspect intervals and move the clock. Map popovers show live courier and destination details.
+- **Copy scenario link** saves the current plan in the URL fragment, including the seed, number of generated days, clock, map view and playback speed. Links open paused and reproduce the estimates. They use a frozen, public version of the app so future deployments do not change a slide's evidence.
 - Controls remain visible, with estimates and plan comparisons refreshed after each change. Methodology and source details live on their own page. A downloadable HTML report records the full configuration, sources, assumptions, seed, model version, source hash and estimates. There is no file-import interface.
+
+## Publishing scenario links
+
+Before publishing a new application version, run `corepack pnpm snapshot` and commit the resulting `snapshots/*.json.gz` archive with the source change. The build expands every committed archive under `/scenarios/<fingerprint>/`, keeping old deck links available after later deployments. Do not delete or replace a published archive.
+
+Share links use `#scenario=1&model=…&seed=…&runs=…&t=…` and only the settings that differ from that frozen version's defaults. They need no login, database, or server-side link storage. Invalid values and mismatched fingerprints display a visible notice. Clipboard denial opens a manual-copy dialog. Downloaded reports include the same scenario link.
+
+A link reproduces a **conditional model result**; it does not turn an assumed input into measured evidence or validate an unsupported claim in the deck.
 
 ## Important evidence boundary
 

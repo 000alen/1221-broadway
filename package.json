@@ -5,8 +5,9 @@
   "packageManager": "pnpm@11.15.1",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node build.mjs && node --test tests/engine.test.mjs && playwright test",
-    "test:engine": "node --test tests/engine.test.mjs"
+    "test": "node build.mjs && node --test tests/*.test.mjs && playwright test",
+    "test:engine": "node --test tests/engine.test.mjs",
+    "snapshot": "node build.mjs --snapshot"
   },
   "dependencies": {
     "leaflet": "1.9.4"
