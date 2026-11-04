@@ -20,3 +20,19 @@ test('report downloads a readable scenario with reproducibility data',async({pag
 for(const width of [390,768,1280])test(`${width}px layout has usable playback and no horizontal overflow`,async({page})=>{await page.setViewportSize({width,height:844});await open(page);await page.getByRole('button',{name:'Play',exact:true}).click();await page.clock.runFor(1000);expect(await current(page)).toBeGreaterThan(575);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await expect(page.locator('#deliveryChart')).toBeVisible();});
 
 test('an open chart popover remains contained when the viewport narrows',async({page})=>{await page.setViewportSize({width:1440,height:900});await open(page);const box=await page.locator('#deliveryChart').boundingBox();await page.mouse.move(box.x+box.width*.8,box.y+50);await expect(page.locator('#chartPopover')).toBeVisible();await page.setViewportSize({width:390,height:844});await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);});
+
+test('maximum staffing keeps comparisons usable and labels unavailable additions',async({page})=>{
+ await open(page);await page.locator('#activeCouriers').fill('12');await page.locator('#runners').fill('12');await page.locator('#elevators').fill('6');await page.clock.runFor(300);await expect(page.locator('#analysisStatus')).toHaveText('Estimates up to date',{timeout:30000});
+ await expect(page.locator('#sensitivity tr')).toHaveCount(7);await expect(page.locator('#sensitivity td').filter({hasText:'At limit'})).toHaveCount(4);await expect(page.locator('#sensitivity')).not.toContainText('NaN');await expect(page.locator('#share')).toBeEnabled();
+});
+test('early staging consolidates visits and reports availability only when the window opens',async({page})=>{
+ await open(page);await page.locator('#allowPrestage').check();await page.clock.runFor(300);await expect(page.locator('#analysisStatus')).toHaveText('Estimates up to date',{timeout:30000});
+ const timings=await page.evaluate(()=>{const d=window.__simulation.getState().day;return{visits:d.floorEvents.filter(e=>e.kind==='floor').length,earliestWork:Math.min(...d.floorEvents.filter(e=>e.kind==='floor').map(e=>e.end)),earliestDelivery:Math.min(...d.deliveries.filter(e=>e.place==='T1221').map(e=>e.t))};});
+ expect(timings.visits).toBe(16);expect(timings.earliestWork).toBeLessThan(700);expect(timings.earliestDelivery).toBe(700);
+});
+test('a courier waiting at an office shows reserve recovery without delaying the whole window',async({page})=>{
+ await open(page);await page.locator('#callout').selectOption('courier');await page.clock.runFor(300);await expect(page.locator('#analysisStatus')).toHaveText('Estimates up to date',{timeout:30000});
+ await page.evaluate(()=>window.__simulation.setTime(650));await expect(page.locator('#cards .status').first()).toHaveText('Waiting for reserve');
+ const e=await page.evaluate(()=>window.__simulation.getState().day.journeys[0].events.find(e=>e.kind==='drop'));
+ expect(e.start).toBe(690);expect(e.dep).toBeLessThan(695);
+});
