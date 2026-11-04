@@ -21,15 +21,15 @@ The same discrete-event engine produces a representative day for map playback, r
 
 `data/routes.json` contains reference-generated intervals, not field observations. Those intervals must never be relabeled as measured samples. The default 7.47-minute pickup value is retained only as a reference input, not asserted to be true.
 
-CSV observations have columns `kind,key,minutes,orders,evidence,source,observed_at`. Supported kinds: `pickup`, `travel`, `intake`, `floor`, `elevator`, `backup`, `handoff`. Pickup means loading-start to departure, excluding queue/readiness wait; travel means road departure to building arrival. Floor means one runner's shelf placement service per order, excluding elevator travel. Elevator means one complete one-way ride including doors and boarding. Intake and handoff are per vehicle batch. Do not mix differently defined measurements. Every row needs an identifiable source and timestamp. Only evidence=observed rows are sampled as measurements; synthetic, reference and unverified records remain explicitly non-observational.
+The interface does not import files or expose measurement plumbing. The engine's structured `observations` input can support future calibration: `kind`, `key`, `minutes`, `orders`, `evidence`, `source`, and `observed_at`. Supported kinds are `pickup`, `travel`, `intake`, `floor`, `elevator`, `backup`, and `handoff`. Only evidence tagged `observed` is eligible for empirical resampling; synthetic, reference and unverified inputs never count as measurements.
 
-Empirical observations are resampled with replacement; with sparse samples, the UI warns that tail estimates are unstable. Samples from one place do not establish another place's distribution. The model does not extrapolate service time against load size without measurements for those load sizes.
+Pickup measures loading-start to departure, excluding queue and readiness wait. Travel measures road departure to building arrival. Floor service is per-order shelf placement, excluding elevator travel. Elevator service is a complete one-way ride, including doors and boarding. Intake and handoff are per vehicle batch. Future calibration must keep these definitions separate, retain source and timestamp, and match load size and location. Sparse samples cannot establish reliable tail behavior.
 
 ## Outputs
 
 - Actual simulated delivery counts, unserved orders, lateness, queue time and final completion time.
 - P50/P95 completion times from repeated days, alongside count of runs and a conditional on-time proportion. These quantify the configured scenario, not real-world calibration confidence.
-- Input provenance counts and missing confirmations displayed with every analysis.
+- The main interface labels outputs as unvalidated planning estimates. A separate methodology page and downloaded report describe assumptions, missing evidence and provenance.
 - Sensitivity comparisons use the same random seeds. A model cannot demonstrate causation in the real operation.
 
 ## Validation boundary

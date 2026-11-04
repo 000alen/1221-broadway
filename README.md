@@ -19,8 +19,9 @@ Open `dist/index.html`; the app embeds its fonts, map data, logic, and worker an
 - Both Concord buildings have delivery events. Shelf completion respects the case's windows.
 - Tower floor jobs combine available batches, share runners and elevators, and return runners to the lobby. Lobby delivery is a separate selectable operation. Runners start no earlier than the assumed 11:20 shift; a courier assigned to runner work is not reused as a driver.
 - Reserve response and handoff delay the affected route. Without a reserve, the affected load is unserved. Runner replacement is a separate resource.
-- A Web Worker runs 100–1,000 seeded scenarios without blocking playback. Outputs include conditional all-orders-on-time rate, P50/P95 completion, late/unserved orders and pickup distributions. Sensitivity runs use the same seeds.
-- CSV observations can replace matching priors. Generated, reference and unverified rows cannot silently become observations. Exports contain configuration, sources, assumptions, seed, model version, source hash, estimates and representative events.
+- A Web Worker runs 500 seeded scenarios without blocking playback. Outputs include conditional all-orders-on-time rate, P50/P95 completion, late/unserved orders and pickup distributions. Sensitivity runs use the same seeds.
+- A persistent bottom chart shows shelf deliveries in five-minute intervals. Click or use the keyboard to inspect intervals and move the clock. Map popovers show live courier and destination details.
+- Controls remain visible, with estimates and plan comparisons refreshed after each change. Methodology and source details live on their own page. A downloadable HTML report records the full configuration, sources, assumptions, seed, model version, source hash and estimates. There is no file-import interface.
 
 ## Important evidence boundary
 
@@ -30,7 +31,7 @@ The supplied Netlify reference provides outbound road geometry and stated typica
 
 The default global cutoff is unconfirmed. Entering a cutoff enforces preparation after that time; setting it late can make the current plan infeasible. A route-specific ordering policy and actual restaurant-to-building order mix still require confirmation.
 
-The displayed confidence interval describes Monte Carlo sampling error **conditional on the inputs**. It does not include unknown input bias or validate a claim of real-world 95% reliability. Increasing the number of simulated days does not turn assumptions into measurements.
+The confidence interval recorded in the report describes Monte Carlo sampling error **conditional on the inputs**. It does not include unknown input bias or validate a claim of real-world 95% reliability. Increasing the number of simulated days does not turn assumptions into measurements.
 
 Full contracts, measurement definitions, limitations and required validation are in [docs/model.md](docs/model.md). Nothing in this app establishes legal pay compliance, food holding safety, actual elevator access, or an accepted production staffing plan.
 
@@ -39,10 +40,12 @@ Full contracts, measurement definitions, limitations and required validation are
 - `src/engine.mjs`: discrete-event queues, resources, delivery windows and seeded draws.
 - `src/priors.mjs`: explicit prior registry and primary-source references.
 - `src/worker.mjs`: scenario sampling and sensitivity runs.
-- `src/app.mjs`: controls, playback, imports and exports.
+- `src/app.mjs`: controls, playback, chart, popovers and report export.
 - `src/map.mjs`: map and event visualization.
-- `template.html`: shell, fonts and styles.
-- `data/`: reference map/routes, fresh return routing and observation schema.
+- `template.html`: accessible application shell.
+- `src/style.css`: responsive application styles.
+- `data/fonts.css`: embedded fonts.
+- `data/`: reference map/routes, embedded fonts and fresh return routing.
 - `build.mjs`: canonical self-contained build; `build.py` delegates to it.
 - `SOURCE_README.md`: historical README for the original map package.
 

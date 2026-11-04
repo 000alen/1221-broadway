@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {defaults,simulate,summarize,parseObservations,evidence,atTime} from '../src/engine.mjs';
+import {defaults,simulate,summarize,evidence,atTime} from '../src/engine.mjs';
 const reference=JSON.parse(readFileSync(new URL('../data/routes.json',import.meta.url)));
 test('seeded runs are reproducible and conserve meals',()=>{const a=simulate(defaults,reference),b=simulate(defaults,reference);assert.deepEqual(a,b);assert.equal(a.delivered+a.unserved,a.total);assert.equal(a.journeys.reduce((n,j)=>n+j.load,0),250);});
 test('no delivery occurs before its delivery window opens',()=>{const r=simulate(defaults,reference);for(const d of r.deliveries)assert(d.t>=(d.place==='T1221'?700:d.place==='Alameda'?720:690));assert.equal(atTime(r,680).delivered,0);});
@@ -9,7 +9,7 @@ test('resource slots cannot serve overlapping work',()=>{const r=simulate(defaul
 test('a late confirmed cutoff blocks early loading',()=>{const c={...defaults,cutoff:640,prep:15},r=simulate(c,reference);for(const j of r.journeys)for(const e of j.events.filter(e=>e.kind==='pick'))assert(e.start>=655);assert(r.lateOrders>0);});
 test('courier absence without reserve leaves the affected load unserved',()=>{const r=simulate({...defaults,callout:'courier',reserveCouriers:0},reference);assert.equal(r.unserved,20);assert.equal(r.completion,Infinity);});
 test('runner absence without replacement cannot borrow an absent runner',()=>{const r=simulate({...defaults,runners:1,callout:'ambassador',localBackup:false},reference);assert.equal(r.deliveries.filter(d=>d.place==='T1221').length,0);assert.equal(r.unserved,200);});
-test('observations retain provenance and generated values are not observed',()=>{const rows=parseObservations('kind,key,minutes,orders,evidence,source,observed_at\npickup,Saucy,3,20,observed,stopwatch,2026-11-03\npickup,Wise,4,20,synthetic,generated,2026-11-03');assert.equal(evidence({...defaults,observations:rows}).observed,1);assert.throws(()=>parseObservations('kind,key,minutes,source,observed_at\npickup,Saucy,-1,test,2026-11-03'));});
+test('generated priors cannot count as field observations',()=>{assert.equal(evidence({...defaults,observations:[{kind:'pickup',evidence:'synthetic',minutes:3}]}).observed,0);});
 test('uncertainty summaries account for incomplete days',()=>{const a=simulate(defaults,reference),b=simulate({...defaults,callout:'courier',reserveCouriers:0},reference);const s=summarize([a,b]);assert.equal(s.runs,2);assert.equal(s.p95,Infinity);assert(s.interval[0]>=0&&s.interval[1]<=1);});
 test('vehicle capacity applies to every route under larger loads',()=>{for(const orders of [200,400])for(const capacity of [40,125]){const r=simulate({...defaults,orders,capacity},reference);assert(r.journeys.every(j=>j.load<=capacity));assert.equal(r.delivered+r.unserved,r.total);}});
 test('tower batches are combined into one visit per floor when staged',()=>{const r=simulate(defaults,reference);assert.equal(r.deliveries.filter(d=>d.place==='T1221').length,16);assert.equal(r.deliveries.filter(d=>d.place==='T1221').reduce((n,d)=>n+d.n,0),200);});
