@@ -6,9 +6,10 @@ const ranges={
   activeCouriers:[1,12],reserveCouriers:[0,1],runners:[1,12],
   orders:[10,1000],capacity:[20,300],floors:[1,30],elevators:[1,6],
   failedCourier:[1,4],backupResponse:[0,60],seed:[0,2147483647],runs:[1,2000],
+  longRoutePay:[0,1000],firstDowntownPay:[0,1000],otherDowntownPay:[0,1000],standbyPay:[0,1000],ambassadorRate:[0,1000],ambassadorMinutes:[0,600],
 };
 const flags=['localBackup','allowPrestage','runnerAssist'];
-const choices={towerMode:['floors','lobby'],callout:['none','courier','ambassador','both'],kitchenDelay:[0,1,2],trafficScale:[1,1.25,1.5]};
+const choices={wageCity:['emeryville','oakland','state'],towerMode:['floors','lobby'],callout:['none','courier','ambassador','both'],kitchenDelay:[0,1,2],trafficScale:[1,1.25,1.5]};
 const keys=[...Object.keys(ranges),...flags,...Object.keys(choices),'cutoff'];
 const controls=new Set(keys);
 const metadata=new Set(['scenario','model','t','view','speed']);

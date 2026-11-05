@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vehicle capacity · 1221 Broadway</title>
+<style>/*APP_FONTS*/
+:root{--paper:#f7f6f2;--ink:#252019;--ink2:#70685c;--rule:#e6e0d6;--orange:#f74c25;--beige:#d9d2c4}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:400 13px/1.5 Inter,Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:32px 28px 48px;display:grid;grid-template-columns:300px 1fr;gap:40px}
+h1{font:500 34px/1.1 Newsreader,Georgia,serif;color:var(--orange);margin:0 0 6px;letter-spacing:-.5px}h2{font-size:13px;font-weight:600;margin:0 0 12px}
+.eyebrow{font-size:10px;letter-spacing:1.2px;color:var(--ink2)}.lede{color:var(--ink2);font-size:12px;margin:0 0 20px}
+section{padding:16px 0;border-top:1px solid var(--rule)}label{display:block;font-size:11px;color:var(--ink2);margin-bottom:12px}
+label output{float:right;color:var(--ink);font-variant-numeric:tabular-nums;font-weight:500}
+input[type=range]{width:100%;accent-color:var(--orange);margin-top:6px}
+input[type=number]{width:100%;height:34px;margin-top:5px;padding:6px 9px;border:1px solid #dcd5c9;border-radius:6px;background:#fffdf9;font:inherit}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:4px 0 22px}.metrics span{display:block;font-size:10px;color:var(--ink2)}
+.metrics strong{display:block;font:500 28px/1.2 Newsreader,Georgia,serif;font-variant-numeric:tabular-nums}
+svg text{font:11px Inter,Arial,sans-serif;fill:#5f574b}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:14px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--rule);text-align:right;font-variant-numeric:tabular-nums}th:first-child,td:first-child{text-align:left}th{font-weight:500;color:var(--ink2)}
+.ok{color:#2f6e5a;font-weight:600}.no{color:#bd3e21;font-weight:600}.note{font-size:11px;color:var(--ink2);margin-top:18px}a{color:#bd3e21}
+@media(max-width:800px){main{grid-template-columns:1fr;gap:10px}}
+</style>
+</head>
+<body>
+<main>
+<aside>
+ <div class="eyebrow">PICNIC · EAST BAY</div><h1>Meals per vehicle</h1>
+ <p class="lede">How many lunches fit in each car, and which car the downtown routes need. Change any assumption.</p>
+ <section><h2>Demand per downtown car</h2>
+  <label>Typical day<output id="oTypical"></output><input id="typical" type="range" min="40" max="250" step="5" value="110"></label>
+  <label>Peak day (Tuesday)<output id="oPeak"></output><input id="peak" type="range" min="40" max="300" step="5" value="130"></label>
+ </section>
+ <section><h2>Packing</h2>
+  <label>Packing efficiency<output id="oPack"></output><input id="pack" type="range" min="40" max="90" step="5" value="65"></label>
+  <label>Pizza share of meals<output id="oPizza"></output><input id="pizza" type="range" min="0" max="60" step="5" value="20"></label>
+  <label>Space per pizza, in meals<output id="oPizzaF"></output><input id="pizzaF" type="range" min="1" max="3" step="0.1" value="1.6"></label>
+  <label>Bag overhead<output id="oBag"></output><input id="bag" type="range" min="1" max="1.5" step="0.05" value="1.15"></label>
+ </section>
+ <section><h2>Insulated carrier</h2>
+  <div class="grid2"><label>Volume, ft³<input id="carrierFt3" type="number" min="1" max="20" step="0.1" value="4.3"></label><label>Meals it holds<input id="carrierMeals" type="number" min="1" max="60" step="1" value="15"></label></div>
+ </section>
+ <section><h2>Usable cargo space, ft³</h2>
+  <div class="grid2" id="vehicles"></div>
+ </section>
+</aside>
+<div>
+ <div class="metrics"><div><span>Smallest car that fits a peak day</span><strong id="mBest">…</strong></div><div><span>Meals per carrier, after bags and pizza</span><strong id="mPerCarrier">…</strong></div><div><span>Peak-day headroom in a minivan</span><strong id="mHead">…</strong></div></div>
+ <h2>Meals each vehicle can carry</h2>
+ <svg id="chart" viewBox="0 0 720 300" role="img" aria-label="Meals per vehicle against downtown demand"></svg>
+ <table><thead><tr><th>Vehicle</th><th>Carriers</th><th>Meals</th><th>Typical day</th><th>Peak day</th></tr></thead><tbody id="rows"></tbody></table>
+ <p class="note">Method: carriers that fit = cargo space × packing efficiency ÷ carrier volume, rounded down. Meals = carriers × meals per carrier ÷ (bag overhead × (1 − pizza share + pizza share × pizza space)). Defaults: a 32 × 13 × 17.75 in carrier holding fifteen 9 × 9 × 3 in containers, and cargo space with seats folded or stowed. All inputs are planning assumptions until measured in a real load test. <a href="./">← Back to the route simulation</a></p>
+</div>
+</main>
+<script>
+const vehicles=[['Sedan',37],['Hatchback',45],['Compact SUV',70],['Minivan',140]];
+const $=id=>document.getElementById(id);
+$('vehicles').innerHTML=vehicles.map(([n,v],i)=>`<label>${n}<input id="v${i}" type="number" min="5" max="400" step="1" value="${v}"></label>`).join('');
+const num=id=>Number($(id).value);
+function update(){
+ const typical=num('typical'),peak=num('peak'),pack=num('pack')/100,pizza=num('pizza')/100,pizzaF=num('pizzaF'),bag=num('bag');
+ $('oTypical').textContent=typical;$('oPeak').textContent=peak;$('oPack').textContent=Math.round(pack*100)+'%';$('oPizza').textContent=Math.round(pizza*100)+'%';$('oPizzaF').textContent=pizzaF.toFixed(1);$('oBag').textContent=bag.toFixed(2)+'×';
+ const perCarrier=num('carrierMeals')/(bag*(1-pizza+pizza*pizzaF)),ft3=Math.max(.1,num('carrierFt3'));
+ const rows=vehicles.map(([name],i)=>{const carriers=Math.floor(num('v'+i)*pack/ft3);return{name,carriers,meals:Math.floor(carriers*perCarrier)};});
+ $('mPerCarrier').textContent=perCarrier.toFixed(1);
+ const best=rows.find(r=>r.meals>=peak);$('mBest').textContent=best?best.name:'None';
+ const mv=rows.at(-1);$('mHead').textContent=`${mv.meals-peak>=0?'+':''}${mv.meals-peak}`;
+ const trips=(m,d)=>m>=d?'<span class="ok">1 trip</span>':m<1?'<span class="no">—</span>':`<span class="no">${Math.ceil(d/m)} trips</span>`;
+ $('rows').innerHTML=rows.map(r=>`<tr><td>${r.name}</td><td>${r.carriers}</td><td>${r.meals}</td><td>${trips(r.meals,typical)}</td><td>${trips(r.meals,peak)}</td></tr>`).join('');
+ // chart
+ const W=720,H=300,L=100,R=20,T=14,B=34,max=Math.max(peak,...rows.map(r=>r.meals))*1.1,x=v=>L+v/max*(W-L-R),bh=(H-T-B)/rows.length;
+ let s='';
+ for(let g=0;g<=4;g++){const v=Math.round(max*g/4/10)*10;s+=`<line x1="${x(v)}" x2="${x(v)}" y1="${T}" y2="${H-B}" stroke="#e6e0d6"/><text x="${x(v)}" y="${H-B+16}" text-anchor="middle">${v}</text>`;}
+ rows.forEach((r,i)=>{const y=T+i*bh+bh*.2,h=bh*.6,fit=r===best;s+=`<text x="${L-10}" y="${y+h/2+4}" text-anchor="end">${r.name}</text><rect x="${L}" y="${y}" width="${Math.max(0,x(r.meals)-L)}" height="${h}" fill="${fit?'#f74c25':'#d9d2c4'}"/><text x="${x(r.meals)+6}" y="${y+h/2+4}">${r.meals}</text>`;});
+ for(const [v,label,dash,end] of [[typical,'Typical '+typical,'4 4',true],[peak,'Peak '+peak,'',false]]){s+=`<line x1="${x(v)}" x2="${x(v)}" y1="${T}" y2="${H-B}" stroke="#252019" stroke-width="1.2" stroke-dasharray="${dash}"/><text x="${x(v)+(end?-4:4)}" y="${T+10}" text-anchor="${end?'end':'start'}" style="font-weight:600">${label}</text>`;}
+ s+=`<text x="${(L+W-R)/2}" y="${H-4}" text-anchor="middle">Meals per load</text>`;
+ $('chart').innerHTML=s;
+}
+document.querySelectorAll('input').forEach(e=>e.addEventListener('input',update));update();
+</script>
+</body>
+</html>

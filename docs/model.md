@@ -51,3 +51,21 @@ The parser accepts only supported setting names, enumerations and bounded numeri
 ## Model 2.1 corrections
 
 Regression coverage includes queued floor-batch consolidation, staging resource release before shelf availability, cart capacity under staging, recovery absorbed by window slack, recovery overlapping service opening, active loading/travel interruptions, loading-bay availability during absence, and comparisons at maximum staffing. Unsupported staffing additions return an unavailable comparison instead of an invented percentage or a failed analysis. Old versioned scenario links intentionally retain their archived calculations.
+
+## Labor cost model (v2.2)
+
+`src/cost.mjs` prices each simulated day. Inputs are plan assumptions, editable under **Pay and cost** and included in scenario links:
+
+| Input | Default | Basis |
+| --- | --- | --- |
+| Long route pay (Concord; San Leandro + Alameda) | $50 | Deck plan |
+| Downtown car 1 / other downtown cars | $35 / $30 | Deck plan |
+| Ambassador rate × shift | $30/h × 90 min | Picnic Tower Ambassador posting; 11:20–12:50 shift |
+| Backup courier standby | $0 | Not in the deck's $345; set it to price standby |
+| Prop 22 minimum wage | Emeryville $20.34 | First pickup (Saucy Asian) is in Emeryville |
+
+Each route is paid `max(planned pay, Prop 22 floor)`, where the floor is 120% × the minimum wage × engaged hours + $0.37 × engaged miles (Cal. Bus. & Prof. Code §7453; 2026 per-mile rate). Engaged time is route start to the final drop, including waiting for a delivery window to open. The return drive is excluded. Engaged miles are the mileage of the legs driven. Ambassador cost is (runners + lobby leads) × rate × shift. Cost per order divides by all orders (tower plus the 50 legacy orders).
+
+Outputs: the average labor cost per order and per day across simulated days, the average Prop 22 top-up, and a per-route table for the day shown on the map.
+
+Limits: this is a planning screen, not a compliance determination. Prop 22 floors are averaged over the pay period, and a batch with pickups in several cities may be treated differently. It applies only if couriers are app-based independent contractors. The model doesn't include payroll taxes, the vehicle cost for a courier who becomes a runner, or training and rehearsal costs.

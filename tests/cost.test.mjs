@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {defaults,simulate} from '../src/engine.mjs';
+import {dayCost,prop22Floor,summarizeCost} from '../src/cost.mjs';
+const reference=JSON.parse(readFileSync(new URL('../data/routes.json',import.meta.url)));
+test('Prop 22 floor matches the statute formula',()=>{assert.equal(prop22Floor(60,10,'oakland').toFixed(2),(1.2*17.34+3.7).toFixed(2));});
+test('routes are paid at least the larger of planned pay and the floor',()=>{const r=simulate(defaults,reference),d=dayCost(r,r.config);for(const x of d.routes){assert(x.paid>=x.planned);if(x.floor!==null)assert(x.paid>=x.floor-1e-9);assert(x.miles>0);}assert.equal(d.ambassadors,4*30*1.5);});
+test('pay at or above every floor needs no top-up',()=>{const c={...defaults,longRoutePay:200,firstDowntownPay:200,otherDowntownPay:200},r=simulate(c,reference),d=dayCost(r,r.config);assert.equal(d.topUp,0);assert.equal(summarizeCost([d]).daysBelowFloor,0);});
+test('cost per order divides by every order, tower and legacy',()=>{const r=simulate(defaults,reference),d=dayCost(r,r.config);assert.equal(d.perOrder,d.total/250);});

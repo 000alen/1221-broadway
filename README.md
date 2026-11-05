@@ -23,6 +23,7 @@ Open `dist/index.html`; the app embeds its fonts, map data, logic, and worker an
 - A persistent bottom chart shows shelf deliveries in five-minute intervals. Click or use the keyboard to inspect intervals and move the clock. Map popovers show live courier and destination details.
 - **Copy scenario link** saves the current plan in the URL fragment, including the seed, number of generated days, clock, map view and playback speed. Links open paused and reproduce the estimates. They use a frozen, public version of the app so future deployments do not change a slide's evidence.
 - Controls remain visible, with estimates and plan comparisons refreshed after each change. Methodology and source details live on their own page. A downloadable HTML report records the full configuration, sources, assumptions, seed, model version, source hash and estimates. There is no file-import interface.
+- Pay controls estimate labor cost per order, daily pay and route top-ups under the configured minimum-wage assumption. These inputs travel with shared scenarios and reports. The vehicle-capacity page compares packing assumptions with typical and peak demand.
 
 ## Publishing scenario links
 
@@ -48,10 +49,12 @@ Full contracts, measurement definitions, limitations and required validation are
 
 - `src/engine.mjs`: discrete-event queues, resources, delivery windows and seeded draws.
 - `src/priors.mjs`: explicit prior registry and primary-source references.
+- `src/cost.mjs`: labor-cost assumptions, route pay and per-day cost summaries.
 - `src/worker.mjs`: scenario sampling and sensitivity runs.
 - `src/app.mjs`: controls, playback, chart, popovers and report export.
 - `src/map.mjs`: map and event visualization.
 - `template.html`: accessible application shell.
+- `capacity.html`: vehicle-capacity calculator source; the build embeds fonts and publishes it beside the simulator and archived scenarios.
 - `src/style.css`: responsive application styles.
 - `data/fonts.css`: embedded fonts.
 - `data/`: reference map/routes, embedded fonts and fresh return routing.
